@@ -1,6 +1,12 @@
 data/
 embeddings/
+models/
 *.npy
+*.joblib
 __pycache__/
 .ipynb_checkpoints/
 .env
+.venv/
+venv/
+.DS_Store
+.vscode/
