@@ -2,10 +2,12 @@
 import numpy as np
 import pandas as pd
 
+from src.active_learning import run_loop
 from src.classifier import evaluate, train
 from src.config import RESULTS_DIR, SEEDS, ensure_dirs
 from src.data import make_splits
 from src.embeddings import load_embeddings
+from src.strategies import STRATEGIES
 
 
 def run_full_supervised(seeds=SEEDS):
@@ -15,22 +17,36 @@ def run_full_supervised(seeds=SEEDS):
     rows = []
     for seed in seeds:
         labeled_idx, pool_idx, test_idx = make_splits(y, seed=seed)
-
-        # Every label except the locked test set
         train_idx = np.concatenate([labeled_idx, pool_idx])
-
         clf = train(X[train_idx], y[train_idx], seed=seed)
         acc = evaluate(clf, X[test_idx], y[test_idx])   # test set used ONLY here
         rows.append({"method": "full_supervised", "seed": seed,
                      "n_labels": len(train_idx), "accuracy": acc})
-
     df = pd.DataFrame(rows)
     df.to_csv(RESULTS_DIR / "full_supervised.csv", index=False)
     return df
 
 
+def run_strategy(name, seeds=SEEDS):
+    """Run one selection strategy over all seeds and save results/<name>.csv."""
+    ensure_dirs()
+    X, y = load_embeddings()
+    rows = []
+    for seed in seeds:
+        # Same seed -> same split for every method, so comparisons are fair
+        labeled_idx, pool_idx, test_idx = make_splits(y, seed=seed)
+        records = run_loop(X, y, labeled_idx, pool_idx, test_idx,
+                           query_fn=STRATEGIES[name], seed=seed)
+        for n_labels, acc in records:
+            rows.append({"method": name, "seed": seed,
+                         "n_labels": n_labels, "accuracy": acc})
+    df = pd.DataFrame(rows)
+    df.to_csv(RESULTS_DIR / f"{name}.csv", index=False)
+    return df
+
+
 if __name__ == "__main__":
-    df = run_full_supervised()
-    print(df.to_string(index=False))
-    print(f"\nMean accuracy: {df['accuracy'].mean():.4f}")
-    print(f"Std deviation: {df['accuracy'].std():.4f}")
+    df = run_strategy("random")
+    summary = df.groupby("n_labels")["accuracy"].agg(["mean", "std"]).round(4)
+    print("Random sampling, mean and std over", df["seed"].nunique(), "seeds:")
+    print(summary)
