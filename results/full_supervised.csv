@@ -1,0 +1,11 @@
+method,seed,n_labels,accuracy
+full_supervised,0,8000,0.884
+full_supervised,1,8000,0.8785
+full_supervised,2,8000,0.888
+full_supervised,3,8000,0.8955
+full_supervised,4,8000,0.8935
+full_supervised,5,8000,0.885
+full_supervised,6,8000,0.8965
+full_supervised,7,8000,0.8835
+full_supervised,8,8000,0.8905
+full_supervised,9,8000,0.8865

@@ -17,6 +17,9 @@ FIGURES_DIR = RESULTS_DIR / "figures"
 # will use a list of seeds.
 DEFAULT_SEED = 42
 
+# Seeds for repeated experiments (results are averaged over these)
+SEEDS = list(range(10))
+
 
 def ensure_dirs() -> None:
     """Create the output folders if they do not exist yet."""
