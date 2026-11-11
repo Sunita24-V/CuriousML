@@ -46,6 +46,7 @@ def run_strategy(name, seeds=SEEDS):
 
 
 if __name__ == "__main__":
+    run_full_supervised()   # best-case reference (writes full_supervised.csv)
     # Run every strategy (random already done, but re-running is cheap)
     all_results = [run_strategy(name) for name in STRATEGIES]
     df = pd.concat(all_results)
