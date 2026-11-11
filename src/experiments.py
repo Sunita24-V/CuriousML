@@ -46,7 +46,12 @@ def run_strategy(name, seeds=SEEDS):
 
 
 if __name__ == "__main__":
-    df = run_strategy("random")
-    summary = df.groupby("n_labels")["accuracy"].agg(["mean", "std"]).round(4)
-    print("Random sampling, mean and std over", df["seed"].nunique(), "seeds:")
-    print(summary)
+    # Run every strategy (random already done, but re-running is cheap)
+    all_results = [run_strategy(name) for name in STRATEGIES]
+    df = pd.concat(all_results)
+
+    # Mean accuracy per label count, one column per method
+    table = df.pivot_table(index="n_labels", columns="method",
+                           values="accuracy", aggfunc="mean").round(4)
+    print("Mean test accuracy over", df["seed"].nunique(), "seeds:")
+    print(table.to_string())   # to_string() prints ALL columns without "..."
